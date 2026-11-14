@@ -1,0 +1,193 @@
+[
+  {
+    "name": "embedded-newline",
+    "routes": [
+      {
+        "path": "/channels",
+        "body": {
+          "channels": [
+            {
+              "id": "c1",
+              "framing": "octet",
+              "connections": [
+                "/connection/1"
+              ]
+            }
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/connection/1",
+        "body": {
+          "$octets": [
+            "<34>1 - device app - m1 - first\nsecond",
+            "<34>1 - device app - m1 - first\nsecond"
+          ]
+        },
+        "status": 200,
+        "method": "GET",
+        "headers": {
+          "X-Relay": "relay-a"
+        }
+      }
+    ],
+    "expected": [
+      {
+        "channel": "c1",
+        "declaredHost": "device",
+        "relay": "relay-a",
+        "timestamp": null,
+        "body": "first\nsecond"
+      },
+      {
+        "channel": "c1",
+        "declaredHost": "device",
+        "relay": "relay-a",
+        "body": "first\nsecond"
+      }
+    ],
+    "forbidden": []
+  },
+  {
+    "name": "partial-frame",
+    "routes": [
+      {
+        "path": "/channels",
+        "body": {
+          "channels": [
+            {
+              "id": "c2",
+              "framing": "octet",
+              "connections": [
+                "/connection/1",
+                "/connection/2"
+              ]
+            }
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/connection/1",
+        "body": "99 <34>1 - dev app - - - half",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/connection/2",
+        "body": {
+          "$octets": [
+            "<34>1 - dev app - - - whole"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      }
+    ],
+    "expected": [
+      {
+        "channel": "c2",
+        "body": "whole"
+      }
+    ],
+    "forbidden": [
+      {
+        "body": "halfwhole"
+      }
+    ]
+  },
+  {
+    "name": "utf8-octet-length",
+    "routes": [
+      {
+        "path": "/channels",
+        "body": {
+          "channels": [
+            {
+              "id": "c1",
+              "framing": "octet",
+              "connections": [
+                "/connection/1"
+              ]
+            }
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/connection/1",
+        "body": {
+          "$octets": [
+            "<34>1 - dev app - - - 桥梁日志"
+          ]
+        },
+        "status": 200,
+        "method": "GET",
+        "headers": {
+          "X-Relay": "relay-a"
+        }
+      }
+    ],
+    "expected": [
+      {
+        "channel": "c1",
+        "declaredHost": "dev",
+        "body": "桥梁日志"
+      }
+    ],
+    "forbidden": []
+  },
+  {
+    "name": "structured-escape",
+    "routes": [
+      {
+        "path": "/channels",
+        "body": {
+          "channels": [
+            {
+              "id": "c1",
+              "framing": "octet",
+              "connections": [
+                "/connection/1"
+              ]
+            }
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/connection/1",
+        "body": {
+          "$octets": [
+            "<34>1 - dev app - - [meta note=\"a\\]b\"] ok"
+          ]
+        },
+        "status": 200,
+        "method": "GET",
+        "headers": {
+          "X-Relay": "relay-a"
+        }
+      }
+    ],
+    "expected": [
+      {
+        "channel": "c1",
+        "structured": [
+          {
+            "id": "meta",
+            "params": {
+              "note": "a]b"
+            }
+          }
+        ],
+        "body": "ok"
+      }
+    ],
+    "forbidden": []
+  }
+]
