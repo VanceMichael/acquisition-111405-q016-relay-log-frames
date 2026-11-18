@@ -11,7 +11,7 @@
     "demo": "node src/cli.mjs demo",
     "demo:feature": "node src/cli.mjs demo --source",
     "provider": "node provider/server.mjs",
-    "acceptance:source": "node --test test/feature.test.mjs",
+    "acceptance:source": "node --test test/feature.test.mjs test/source.test.mjs",
     "collect": "node src/cli.mjs collect",
     "verify:complete": "npm test && npm run acceptance:source"
   }

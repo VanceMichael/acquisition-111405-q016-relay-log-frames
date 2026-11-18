@@ -21,6 +21,7 @@ export function createTransport(baseUrl, options = {}) {
       length += chunk.length;
       if (length > maximumBytes) throw new Error('资料超过本地接收上限');
       chunks.push(chunk);
+      if (typeof requestOptions.onChunk === 'function') requestOptions.onChunk(chunk);
     }
     const bytes = Buffer.concat(chunks);
     const exchange = {
